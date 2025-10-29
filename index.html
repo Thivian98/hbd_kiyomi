@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Birthday Ritual</title>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&display=swap");
+
+      :root {
+        --bg-main: radial-gradient(circle at 20% 20%, #1a0f1f 0%, #050305 70%);
+        --panel-bg: rgba(10, 6, 12, 0.6);
+        --panel-border: rgba(170, 0, 85, 0.3);
+        --accent: #b1064b;
+        --accent-soft: rgba(177, 6, 75, 0.18);
+
+        --text-main: #fff;
+        --text-dim: rgba(255, 255, 255, 0.75);
+
+        --radius-xl: 1.5rem;
+        --radius-lg: 1rem;
+        --radius-sm: 0.5rem;
+
+        --blur-card: blur(18px);
+
+        --t-fast: 0.18s ease;
+        --t-slow: 0.28s ease;
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--bg-main);
+        background-attachment: fixed;
+        color: var(--text-main);
+        font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica Neue, Arial, sans-serif;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 3rem 1rem 6rem;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      /* vignette */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(
+          circle at 50% 40%,
+          rgba(0, 0, 0, 0) 0%,
+          rgba(0, 0, 0, 0) 45%,
+          rgba(0, 0, 0, 0.9) 80%
+        );
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* soft crimson bloom */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(90vw, 780px);
+        height: 100vh;
+        background: radial-gradient(
+          circle at 50% 10%,
+          rgba(177, 6, 75, 0.22) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        filter: blur(80px);
+        opacity: 0.35;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* drifting gothic icons */
+      .drift-layer {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .drift-item {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.22);
+        text-shadow: 0 0 6px rgba(177, 6, 75, 0.4);
+        animation: drift 12s linear infinite;
+        opacity: 0.5;
+        font-family: "Playfair Display", serif;
+        user-select: none;
+      }
+      .drift-item.v1 {
+        font-size: 0.9rem;
+        animation-duration: 12s;
+        opacity: 0.35;
+      }
+      .drift-item.v2 {
+        font-size: 1.1rem;
+        animation-duration: 16s;
+      }
+      .drift-item.v3 {
+        font-size: 1rem;
+        animation-duration: 20s;
+        opacity: 0.3;
+      }
+      @keyframes drift {
+        from {
+          transform: translate3d(var(--start-x), 110vh, 0) rotate(0deg) scale(1);
+        }
+        to {
+          transform: translate3d(var(--end-x), -10vh, 0) rotate(360deg)
+            scale(1.1);
+        }
+      }
+
+      /* tiny sparkles */
+      .spark-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 4;
+        mix-blend-mode: screen;
+        opacity: 0.4;
+      }
+      .spark {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: radial-gradient(
+          circle,
+          #fff 0%,
+          rgba(255, 255, 255, 0) 70%
+        );
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.8),
+          0 0 16px rgba(177, 6, 75, 0.6);
+        border-radius: 50%;
+        animation: sparkFloat 5s linear infinite;
+      }
+      .spark.sm {
+        width: 1px;
+        height: 1px;
+        filter: blur(0.3px);
+      }
+      .spark.lg {
+        width: 3px;
+        height: 3px;
+        filter: blur(0.2px);
+      }
+      @keyframes sparkFloat {
+        0% {
+          transform: translateY(0) translateX(0) scale(1);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translateY(-30px) translateX(10px) scale(1.2);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-60px) translateX(-5px) scale(0.8);
+          opacity: 0;
+        }
+      }
+
+      /* main wrapper */
+      .app-shell {
+        width: 100%;
+        max-width: 780px;
+        position: relative;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .glow {
+        position: absolute;
+        inset: 0;
+        filter: blur(70px);
+        opacity: 0.35;
+        pointer-events: none;
+        background: radial-gradient(
+          circle at 30% 30%,
+          rgba(177, 6, 75, 0.45) 0%,
+          rgba(40, 0, 40, 0.28) 40%,
+          transparent 70%
+        );
+        mix-blend-mode: screen;
+        animation: floaty 6s ease-in-out infinite;
+      }
+      @keyframes floaty {
+        0%,
+        100% {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        50% {
+          transform: translate3d(0, -8px, 0) scale(1.03);
+        }
+      }
+
+      /* HERO title */
+      .hero {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .hero-title {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(1.8rem, 4.5vw, 3rem);
+        line-height: 1.15;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: #ffe2f0;
+        text-shadow: 0 0 24px rgba(177, 6, 75, 0.55),
+          0 0 4px rgba(255, 255, 255, 0.4);
+        display: inline-block;
+        padding: 0.6rem 1.1rem;
+        border: 1px solid rgba(177, 6, 75, 0.45);
+        border-radius: 1rem;
+        background: radial-gradient(
+            circle at 50% 50%,
+            rgba(177, 6, 75, 0.15) 0%,
+            rgba(0, 0, 0, 0) 70%
+          ),
+          rgba(177, 6, 75, 0.08);
+        box-shadow: 0 25px 60px rgba(177, 6, 75, 0.35),
+          inset 0 0 30px rgba(177, 6, 75, 0.18), 0 40px 120px rgba(0, 0, 0, 0.9);
+        position: relative;
+      }
+      .hero-title::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -12px;
+        width: 60%;
+        height: 1px;
+        transform: translateX(-50%);
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 255, 255, 0.6) 0%,
+          rgba(255, 255, 255, 0) 70%
+        );
+        filter: blur(1px);
+        opacity: 0.4;
+      }
+
+      /* ritual / quiz card */
+      .card {
+        position: relative;
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        border-radius: var(--radius-xl);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9),
+          inset 0 2px 3px rgba(255, 0, 128, 0.08);
+        backdrop-filter: var(--blur-card);
+        -webkit-backdrop-filter: var(--blur-card);
+        padding: 2rem 1.5rem 1.5rem;
+        width: 100%;
+        max-width: 640px;
+        text-align: center;
+      }
+
+      .card::before,
+      .card::after {
+        content: "";
+        position: absolute;
+        width: 84px;
+        height: 84px;
+        border: 1px solid rgba(177, 6, 75, 0.4);
+        border-radius: 12px;
+        filter: drop-shadow(0 0 6px rgba(177, 6, 75, 0.4));
+        pointer-events: none;
+      }
+      .card::before {
+        top: 12px;
+        left: 12px;
+        border-right: none;
+        border-bottom: none;
+      }
+      .card::after {
+        bottom: 12px;
+        right: 12px;
+        border-left: none;
+        border-top: none;
+      }
+
+      /* SCREENS */
+      header.intro,
+      .question-stage,
+      .final-stage {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      /* show intro by default */
+      header.intro.active {
+        display: flex;
+      }
+      .question-stage.active {
+        display: flex;
+      }
+      .final-stage.active {
+        display: flex;
+      }
+
+      .tiny-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 0.4rem 0.7rem;
+        border-radius: 0.55rem;
+        letter-spacing: 0.05em;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(177, 6, 75, 0.5);
+        font-family: "Playfair Display", serif;
+        text-transform: uppercase;
+        box-shadow: 0 10px 30px rgba(177, 6, 75, 0.4);
+      }
+
+      h1 {
+        margin: 0.25rem 0 0.6rem;
+        font-family: "Playfair Display", serif;
+        font-size: clamp(1.4rem, 3.4vw, 2rem);
+        line-height: 1.25;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--text-main);
+        text-shadow: 0 0 10px rgba(177, 6, 75, 0.4);
+      }
+      .subtitle {
+        font-size: clamp(0.95rem, 2.8vw, 1.05rem);
+        color: var(--text-dim);
+        line-height: 1.65;
+        max-width: 40ch;
+        margin-bottom: 1.25rem;
+      }
+
+      /* cake altar */
+      .altar-wrapper {
+        position: relative;
+        margin: 0.4rem 0 1.5rem;
+      }
+      .lace-circle {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 255, 255, 0.08) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 40px rgba(177, 6, 75, 0.45),
+          0 30px 60px rgba(0, 0, 0, 0.8);
+        opacity: 0.65;
+        filter: blur(1.5px);
+        pointer-events: none;
+      }
+      .lace-circle::after {
+        content: "";
+        position: absolute;
+        inset: 14px;
+        border-radius: 50%;
+        background-image: repeating-radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 255, 255, 0.08) 0 2px,
+          rgba(0, 0, 0, 0) 2px 4px
+        );
+        mix-blend-mode: screen;
+        opacity: 0.4;
+        filter: blur(1px);
+      }
+
+      .cake-wrapper {
+        position: relative;
+        cursor: pointer;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform var(--t-fast), filter var(--t-fast);
+      }
+      .cake-wrapper:hover {
+        filter: drop-shadow(0 0 10px rgba(255, 200, 150, 0.4));
+      }
+      .cake {
+        width: 160px;
+        height: 120px;
+        background: linear-gradient(#2a2a2a 0%, #121212 60%, #000 100%);
+        border-radius: 0 0 1rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 25px 60px rgba(177, 6, 75, 0.55),
+          0 0 30px rgba(177, 6, 75, 0.28) inset, 0 18px 50px rgba(0, 0, 0, 0.9);
+        position: relative;
+        animation: floatcake 3s ease-in-out infinite;
+        margin-inline: auto;
+      }
+      @keyframes floatcake {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-4px);
+        }
+      }
+      .icing {
+        position: absolute;
+        top: -20px;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: radial-gradient(circle at 50% 0%, #2a0f20 0%, #1a0013 70%);
+        border-radius: 1rem 1rem 0.5rem 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+      }
+      .icing::after,
+      .icing::before {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        width: 22px;
+        height: 18px;
+        background: radial-gradient(circle at 50% 0%, #2a0f20 0%, #1a0013 70%);
+        border-radius: 0 0 0.6rem 0.6rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+      }
+      .icing::after {
+        left: 22px;
+      }
+      .icing::before {
+        right: 28px;
+        height: 20px;
+        width: 18px;
+      }
+
+      .candle {
+        position: absolute;
+        top: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 14px;
+        height: 40px;
+        background: repeating-linear-gradient(
+          0deg,
+          #2b0010 0 4px,
+          #8a003a 4px 8px
+        );
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 2px;
+      }
+      .flame {
+        width: 10px;
+        height: 16px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 50% 30%,
+          rgba(255, 230, 170, 1) 0%,
+          rgba(255, 140, 60, 1) 60%,
+          rgba(255, 0, 0, 0.4) 80%
+        );
+        filter: blur(1px) drop-shadow(0 0 6px rgba(255, 200, 150, 0.8));
+        box-shadow: 0 0 20px rgba(255, 140, 60, 0.6);
+        opacity: 0;
+        transition: opacity var(--t-slow);
+        animation: flicker 0.15s infinite;
+      }
+      @keyframes flicker {
+        0% {
+          transform: scale(1) translateY(0);
+        }
+        50% {
+          transform: scale(0.9) translateY(1px);
+        }
+        100% {
+          transform: scale(1.05) translateY(-1px);
+        }
+      }
+      .cake-glow {
+        position: absolute;
+        top: -80px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 230px;
+        height: 230px;
+        pointer-events: none;
+        filter: blur(34px);
+        background: radial-gradient(
+          circle at 50% 20%,
+          rgba(255, 180, 120, 0.55) 0%,
+          rgba(177, 6, 75, 0.22) 60%,
+          transparent 70%
+        );
+        opacity: 0;
+        transition: opacity var(--t-slow);
+      }
+      .cake-hint {
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        margin-top: 0.65rem;
+        min-height: 2em;
+      }
+      .cake-hint.lit {
+        color: #ffd7a7;
+        text-shadow: 0 0 8px rgba(255, 200, 150, 0.7);
+      }
+
+      /* buttons */
+      .start-btn,
+      .next-btn,
+      .replay-btn {
+        background: var(--accent);
+        color: #0f0f16;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0.9rem 1.1rem;
+        border: 0;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        width: 100%;
+        max-width: 240px;
+        box-shadow: 0 15px 40px rgba(177, 6, 75, 0.45);
+        transition: transform var(--t-fast), box-shadow var(--t-fast),
+          filter var(--t-fast);
+      }
+      .start-btn:active,
+      .next-btn:active,
+      .replay-btn:active {
+        transform: scale(0.98);
+        box-shadow: 0 6px 20px rgba(177, 6, 75, 0.32);
+      }
+      .start-btn.wiggle {
+        animation: wiggleBtn 1.2s ease-in-out infinite;
+      }
+      @keyframes wiggleBtn {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+          filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
+        }
+        50% {
+          transform: translateY(-2px) scale(1.02);
+          filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+        }
+      }
+
+      /* QUESTION SCREEN */
+      .question-stage {
+        width: 100%;
+        max-width: 600px;
+        text-align: left;
+        color: var(--text-main);
+        margin-top: 0.5rem;
+      }
+      .progress {
+        width: 100%;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-dim);
+        display: flex;
+        justify-content: space-between;
+        margin: 0 0 0.75rem;
+      }
+      .progress-bar-wrap {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 0.5rem;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+      .progress-bar-inner {
+        height: 100%;
+        width: 0%;
+        background: var(--accent);
+        transition: width var(--t-slow);
+      }
+      .question-text {
+        font-size: 1rem;
+        line-height: 1.45;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+      .answers {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+      .answer-btn {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: var(--radius-lg);
+        padding: 1rem;
+        text-align: left;
+        color: var(--text-main);
+        font-size: 1rem;
+        line-height: 1.5;
+        cursor: pointer;
+        transition: border var(--t-fast), background var(--t-fast),
+          box-shadow var(--t-fast), transform var(--t-fast);
+      }
+      .answer-btn .letter {
+        display: inline-block;
+        margin-right: 0.6rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--accent);
+        background: var(--accent-soft);
+        border: 1px solid rgba(177, 6, 75, 0.5);
+        border-radius: 0.45rem;
+        padding: 0.35rem 0.55rem;
+        line-height: 1;
+      }
+      .answer-btn.correct {
+        background: rgba(64, 255, 170, 0.09);
+        border: 1px solid rgba(64, 255, 170, 0.6);
+        box-shadow: 0 15px 40px rgba(64, 255, 170, 0.2);
+      }
+      .answer-btn.wrong {
+        background: rgba(255, 87, 87, 0.09);
+        border: 1px solid rgba(255, 87, 87, 0.6);
+        box-shadow: 0 15px 40px rgba(255, 87, 87, 0.2);
+      }
+      .answer-btn:active {
+        transform: scale(0.985);
+      }
+
+      .feedback-box {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: var(--radius-lg);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--text-dim);
+        padding: 0.9rem 1rem;
+        margin-bottom: 1rem;
+        min-height: 3.2rem;
+        display: none;
+      }
+      .feedback-box.active {
+        display: block;
+      }
+
+      .next-btn {
+        display: none;
+        max-width: 180px;
+        margin-top: 0.5rem;
+      }
+      .next-btn.active {
+        display: inline-block;
+      }
+
+      /* FINAL SCREEN */
+      .final-heart {
+        font-size: 2.2rem;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 10px 20px rgba(177, 6, 75, 0.6));
+        animation: slowpulse 2.4s ease-in-out infinite;
+      }
+      @keyframes slowpulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.07);
+        }
+      }
+      .final-main {
+        font-family: "Playfair Display", serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        color: var(--text-main);
+        text-shadow: 0 0 10px rgba(177, 6, 75, 0.4);
+      }
+      .final-note {
+        font-size: 1rem;
+        color: var(--text-dim);
+        line-height: 1.6;
+        max-width: 38ch;
+        margin-bottom: 1.25rem;
+        text-align: center;
+      }
+
+      /* updated "secret-card" to look like a vow / letter */
+      .secret-card {
+        width: 100%;
+        max-width: 500px;
+        background: rgba(10, 6, 12, 0.6);
+        background-image: radial-gradient(
+          circle at 0% 0%,
+          rgba(177, 6, 75, 0.12) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        border: 1px solid rgba(177, 6, 75, 0.4);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95),
+          0 0 40px rgba(177, 6, 75, 0.4), inset 0 0 30px rgba(177, 6, 75, 0.18);
+        padding: 1.25rem 1.5rem 1.5rem;
+        text-align: left;
+        color: var(--text-main);
+        font-size: 1rem;
+        line-height: 1.6;
+        font-family: "Inter", sans-serif;
+        position: relative;
+        white-space: pre-line;
+      }
+      .secret-card::before {
+        content: "Our Promise";
+        position: absolute;
+        top: -0.8rem;
+        left: 1rem;
+        background: var(--accent-soft);
+        border: 1px solid rgba(177, 6, 75, 0.5);
+        border-radius: 0.5rem;
+        padding: 0.35rem 0.6rem;
+        font-size: 0.7rem;
+        font-family: "Playfair Display", serif;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--accent);
+        box-shadow: 0 10px 30px rgba(177, 6, 75, 0.5);
+      }
+
+      .replay-btn {
+        max-width: 180px;
+        margin-inline: auto;
+        display: block;
+      }
+
+      footer.sig {
+        text-align: center;
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.45);
+        margin-top: 1rem;
+        letter-spacing: 0.05em;
+      }
+
+      /* =========================
+   PHOTO ALTAR GRID
+   ========================= */
+
+      .photo-altar {
+        margin-top: 3rem;
+        width: 100%;
+        max-width: 700px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+      }
+
+      .altar-row-top {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .altar-row-bottom {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+      }
+
+      /* shared portrait base */
+      .portrait {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9),
+          0 0 22px rgba(177, 6, 75, 0.35);
+        transition: transform var(--t-fast), box-shadow var(--t-fast),
+          filter var(--t-fast);
+      }
+      .portrait img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        filter: brightness(0.95) contrast(1.06);
+        transition: transform 0.25s ease, filter 0.25s ease;
+      }
+      .portrait:hover {
+        transform: translateY(-3px) scale(1.02);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.25));
+        box-shadow: 0 35px 70px rgba(0, 0, 0, 0.95),
+          0 0 30px rgba(177, 6, 75, 0.6);
+      }
+      .portrait:hover img {
+        transform: scale(1.05);
+        filter: brightness(1.05) contrast(1.1) saturate(1.08);
+      }
+
+      /* gothic rectangle frame */
+      .frame-goth {
+        border-radius: 1rem;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(0, 0, 0, 0.75) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        border: 1px solid rgba(177, 6, 75, 0.55);
+        box-shadow: 0 35px 70px rgba(0, 0, 0, 0.95),
+          0 0 30px rgba(177, 6, 75, 0.5), inset 0 0 30px rgba(177, 6, 75, 0.15);
+        position: relative;
+      }
+      .frame-goth .inner-border {
+        position: absolute;
+        inset: 0.6rem;
+        border-radius: 0.7rem;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        box-shadow: 0 0 12px rgba(177, 6, 75, 0.4);
+        pointer-events: none;
+        mix-blend-mode: screen;
+      }
+      .frame-goth::before,
+      .frame-goth::after {
+        content: "";
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        border: 1px solid rgba(177, 6, 75, 0.6);
+        filter: drop-shadow(0 0 6px rgba(177, 6, 75, 0.8));
+        border-radius: 6px;
+        pointer-events: none;
+      }
+      .frame-goth::before {
+        top: 8px;
+        left: 8px;
+        border-right: 0;
+        border-bottom: 0;
+      }
+      .frame-goth::after {
+        bottom: 8px;
+        right: 8px;
+        border-left: 0;
+        border-top: 0;
+      }
+
+      /* round frame */
+      .p-round {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        border: 1px solid rgba(177, 6, 75, 0.45);
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(177, 6, 75, 0.08) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9),
+          0 0 22px rgba(177, 6, 75, 0.35);
+        overflow: hidden;
+        flex: 0 0 auto;
+      }
+      .p-round img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: center 30%;
+      }
+
+      /* HEART FRAME (fixed: no visible square box) */
+      .frame-heart {
+        width: 160px;
+        height: 160px;
+        flex: 0 0 auto;
+        position: relative;
+        /* create glow around the clip shape, not square */
+        filter: drop-shadow(0 0 8px rgba(177, 6, 75, 0.6))
+          drop-shadow(0 0 20px rgba(177, 6, 75, 0.4));
+      }
+      .frame-heart-clip {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        /* custom heart path */
+        clip-path: path(
+          "M50 15C35 0 0 5 0 35C0 60 25 80 50 95C75 80 100 60 100 35C100 5 65 0 50 15Z"
+        );
+        /* upscale path to fill the box */
+        transform-origin: center;
+        transform: scale(1) translateZ(0);
+        background: radial-gradient(
+          circle at 50% 40%,
+          rgba(177, 6, 75, 0.4) 0%,
+          rgba(0, 0, 0, 0.6) 70%
+        );
+        border: 2px solid rgba(177, 6, 75, 0.6);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9),
+          0 0 35px rgba(177, 6, 75, 0.6),
+          inset 0 0 6px rgba(255, 255, 255, 0.15);
+      }
+      .frame-heart-clip img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 30%;
+        /* must match same clip-path to avoid square corners */
+        clip-path: path(
+          "M50 15C35 0 0 5 0 35C0 60 25 80 50 95C75 80 100 60 100 35C100 5 65 0 50 15Z"
+        );
+      }
+      .frame-heart-outline {
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        /* same path, inset for inner glow line */
+        clip-path: path(
+          "M50 15C35 0 0 5 0 35C0 60 25 80 50 95C75 80 100 60 100 35C100 5 65 0 50 15Z"
+        );
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 0 20px rgba(177, 6, 75, 0.7);
+        mix-blend-mode: screen;
+      }
+
+      /* sizes for top/bottom row */
+      .p-wide {
+        width: 240px;
+        height: 200px;
+        flex: 0 0 auto;
+        border-radius: 1rem;
+      }
+      .p-tall {
+        width: 150px;
+        height: 200px;
+        flex: 0 0 auto;
+        border-radius: 1rem;
+      }
+      .p-tall.frame-goth .inner-border {
+        border-radius: 0.7rem;
+      }
+
+      /* responsive */
+      @media (max-width: 600px) {
+        .p-wide {
+          width: 200px;
+          height: 170px;
+        }
+        .p-tall {
+          width: 140px;
+          height: 180px;
+        }
+        .p-round {
+          width: 140px;
+          height: 140px;
+        }
+        .frame-heart {
+          width: 140px;
+          height: 140px;
+        }
+      }
+
+      /* accessibility - less motion */
+      @media (prefers-reduced-motion: reduce) {
+        .drift-item,
+        .glow,
+        .cake,
+        .final-heart,
+        .start-btn.wiggle {
+          animation: none !important;
+        }
+        .spark {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- drifting gothic icons -->
+    <div class="drift-layer">
+      <div
+        class="drift-item v1"
+        style="--start-x: -10vw; --end-x: -5vw; left: 6%; animation-delay: -2s"
+      >
+        ✦
+      </div>
+      <div
+        class="drift-item v2"
+        style="--start-x: 0vw; --end-x: -10vw; left: 22%; animation-delay: -5s"
+      >
+        ❦
+      </div>
+      <div
+        class="drift-item v3"
+        style="--start-x: 10vw; --end-x: -15vw; left: 48%; animation-delay: -1s"
+      >
+        🦋
+      </div>
+      <div
+        class="drift-item v1"
+        style="--start-x: -5vw; --end-x: -20vw; left: 68%; animation-delay: -7s"
+      >
+        ✴
+      </div>
+      <div
+        class="drift-item v2"
+        style="--start-x: 5vw; --end-x: -5vw; left: 84%; animation-delay: -4s"
+      >
+        ❦
+      </div>
+    </div>
+
+    <!-- sparkles -->
+    <div class="spark-layer" aria-hidden="true">
+      <div
+        class="spark sm"
+        style="left: 20%; top: 30%; animation-delay: -1s"
+      ></div>
+      <div
+        class="spark lg"
+        style="left: 55%; top: 45%; animation-delay: -2.3s"
+      ></div>
+      <div
+        class="spark"
+        style="left: 70%; top: 20%; animation-delay: -3.1s"
+      ></div>
+      <div
+        class="spark sm"
+        style="left: 35%; top: 60%; animation-delay: -4.2s"
+      ></div>
+      <div
+        class="spark"
+        style="left: 80%; top: 70%; animation-delay: -2s"
+      ></div>
+    </div>
+
+    <div class="app-shell">
+      <div class="glow"></div>
+
+      <!-- HERO TITLE -->
+      <div class="hero">
+        <div class="hero-title">Happy Birthday, Kiyomi! 🖤</div>
+      </div>
+
+      <!-- CARD PANEL -->
+      <div class="card" id="cardPanel">
+        <!-- INTRO SCREEN (VISIBLE FIRST) -->
+        <header class="intro active" id="introScreen">
+          <div class="tiny-label">Birthday Ritual • For You</div>
+
+          <h1>My beautiful seamstress of darkness.</h1>
+
+          <p class="subtitle">
+            Tonight we celebrate you. You’ll answer questions about us, unlock
+            secrets, and claim your gift. Step one is simple: awaken the ritual
+            cake.
+          </p>
+
+          <div class="altar-wrapper">
+            <div class="lace-circle" aria-hidden="true"></div>
+
+            <div
+              class="cake-wrapper"
+              id="cakeWrapper"
+              aria-label="Birthday cake. Tap to light."
+            >
+              <div class="cake-glow" id="cakeGlow"></div>
+
+              <div class="cake">
+                <div class="icing"></div>
+                <div class="candle">
+                  <div class="flame" id="flame"></div>
+                </div>
+              </div>
+
+              <div class="cake-hint" id="cakeHint">
+                tap the cake to light the candle
+              </div>
+            </div>
+          </div>
+
+          <button class="start-btn" id="startBtn" style="display: none">
+            Begin your quest ▶
+          </button>
+
+          <footer class="sig">stitched with love</footer>
+        </header>
+
+        <!-- QUESTION SCREEN (HIDDEN UNTIL START) -->
+        <section class="question-stage" id="questionScreen" aria-live="polite">
+          <div class="progress">
+            <div id="progressText">Question 1 / 20</div>
+            <div id="scoreText">Score: 0</div>
+          </div>
+
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-inner" id="progressBar"></div>
+          </div>
+
+          <div class="question-text" id="questionText" tabindex="-1"></div>
+
+          <div class="answers" id="answersWrap"></div>
+
+          <div class="feedback-box" id="feedbackBox"></div>
+
+          <button class="next-btn" id="nextBtn">Next ▶</button>
+        </section>
+
+        <!-- FINAL SCREEN -->
+        <section class="final-stage" id="finalScreen">
+          <div class="tiny-label">Ritual Complete</div>
+          <div class="final-heart">🖤</div>
+          <div class="final-main" id="finalTitle">
+            Your offering has been prepared.
+          </div>
+          <div class="final-note" id="finalNote">
+            You survived every question like the powerful creature you are.
+          </div>
+
+          <div class="secret-card" id="secretMessage"></div>
+
+          <button class="replay-btn" id="replayBtn">Again?</button>
+        </section>
+      </div>
+
+      <!-- PHOTO ALTAR BELOW CARD -->
+      <section class="photo-altar" aria-label="Favorite photos">
+        <!-- TOP ROW: 2 WIDE GOTH FRAMES SIDE BY SIDE -->
+        <div class="altar-row-top">
+          <figure class="portrait frame-goth p-wide">
+            <div class="inner-border"></div>
+            <img
+              src="/20250424_141540.jpg"
+              alt="Kiyomi portrait 1"
+              style="object-position: center 30%"
+            />
+          </figure>
+
+          <figure class="portrait frame-goth p-wide">
+            <div class="inner-border"></div>
+            <img
+              src="/Untitled96_20250128114859.jpg"
+              alt="Kiyomi portrait 2"
+              style="object-position: center 40%"
+            />
+          </figure>
+        </div>
+
+        <!-- BOTTOM ROW: circle • heart • tall goth -->
+        <div class="altar-row-bottom">
+          <figure class="portrait p-round">
+            <img
+              src="/20250810_124411.jpg"
+              alt="Kiyomi portrait 3"
+              style="object-position: center 25%"
+            />
+          </figure>
+
+          <figure class="frame-heart">
+            <div class="frame-heart-clip portrait">
+              <img
+                src="/20250810_124738.jpg"
+                alt="Kiyomi portrait 4"
+                style="object-position: center 30%"
+              />
+            </div>
+            <div class="frame-heart-outline"></div>
+          </figure>
+
+          <figure class="portrait frame-goth p-tall">
+            <div class="inner-border"></div>
+            <img
+              src="/Untitled89_20241109141102.jpg"
+              alt="Kiyomi portrait 5"
+              style="object-position: center 20%"
+            />
+          </figure>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      /* QUESTIONS / ANSWERS LOGIC */
+      const questions = [
+        {
+          type: "mc",
+          question: "When did we first meet?",
+          answers: [
+            "October 2021",
+            "December 2022",
+            "March 2023",
+            "January 2024",
+          ],
+          correctIndex: 1,
+          feedback:
+            "December 2022. That’s when I was at one of my lowest points and discovered you, the love of my life.",
+        },
+        {
+          type: "text",
+          question: "What was the dare I said I’d do for $100?",
+          validate: (input) => {
+            const cleaned = input.toLowerCase().trim();
+            const hasIceCream =
+              cleaned.includes("ice cream") || cleaned.includes("icecream");
+            if (hasIceCream) {
+              return {
+                correct: true,
+                message:
+                  "Yeah. Deepthroating a penis looking ice cream in Japan. $100 is $100.",
+              };
+            } else {
+              return {
+                correct: false,
+                message:
+                  "Mmm not quite. Be specific. What was I going to do, and with what?",
+                hint: "Hint: it was something I said I’d do with a certain dessert 👀",
+              };
+            }
+          },
+          feedbackOnCorrect:
+            "You remembered that way too fast actually. Wow. Little freak. You REALLY want to see me take that thing hm?",
+        },
+        {
+          type: "text",
+          question:
+            "When you visit me, I said we’d do this for the first time… then later I said it was a total waste of money.",
+          validate: (input) => {
+            const cleaned = input.toLowerCase().trim();
+            const hasTrain = cleaned.includes("train");
+            if (hasTrain) {
+              return {
+                correct: true,
+                message:
+                  "Yeah. I said we’d go on a train ride just because it’d be our first time together. Then I was like... wait... trains are expensive and it would be boring just sitting in a train for days.",
+              };
+            } else {
+              return {
+                correct: false,
+                message: "Close, but not it.",
+                hint: "Hint: choo choo. Public transit but make it romantic.",
+              };
+            }
+          },
+          feedbackOnCorrect:
+            "I'm still taking you places. Just maybe... smarter places. And more fun.",
+        },
+        {
+          type: "text",
+          question:
+            "I joked that I would wear THIS to pick you up from the airport. What was it?",
+          validate: (input) => {
+            const cleaned = input.toLowerCase().trim();
+            const hasYellow = cleaned.includes("yellow");
+            const hasNike = cleaned.includes("nike");
+            const hasTech = cleaned.includes("tech");
+            if (hasYellow && hasNike && hasTech) {
+              return {
+                correct: true,
+                message:
+                  "Full yellow Nike tech, head to toe. Loud and embarrassing. I would’ve done it too. Honestly, I still will just to embarrass you. JKJK...maybe.",
+              };
+            } else {
+              return {
+                correct: false,
+                message:
+                  "Mm. Not quite. I said I'd pull up looking like a highlighter.",
+                hint: "Hint: brand = Nike, color = illegal banana, outfit = matching set.",
+              };
+            }
+          },
+          feedbackOnCorrect:
+            "You’re lucky airport security would've stopped me for crimes against tone.",
+        },
+        {
+          type: "text",
+          question: "What was the first movie we watched together?",
+          validate: (input) => {
+            const cleaned = input.toLowerCase().trim();
+            const correct = cleaned.includes("the road");
+            if (correct) {
+              return {
+                correct: true,
+                message:
+                  "Yes. The Road. Apocalyptic, miserable, emotionally devastating. Perfect date night energy for us.",
+              };
+            } else {
+              return {
+                correct: false,
+                message: "That’s not the one I’m thinking of.",
+                hint: "Hint: it’s an apocalyptic movie about surviving when everything’s basically dead.",
+              };
+            }
+          },
+          feedbackOnCorrect:
+            "Nothing says romance like bleak hopeless dystopia and ‘please don’t die.’",
+        },
+        {
+          type: "text",
+          question: "What do I tell you every single day?",
+          validate: (input) => {
+            const cleaned = input.toLowerCase().trim();
+            const saysLove =
+              cleaned.includes("love you") || cleaned.includes("i love you");
+            if (saysLove) {
+              return {
+                correct: true,
+                message:
+                  "Correct. I love you. Every day. Every version of you.",
+              };
+            } else {
+              return {
+                correct: false,
+                message: "Wrong 😔. That hurt me actually.",
+                hint: "Hint: I literally annoy you with how often I say this. It's three words. Starts with 'I'. Ends with 'you'.",
+              };
+            }
+          },
+          feedbackOnCorrect: "And I’ll keep saying it. You’re stuck with me.",
+        },
+        {
+          type: "mc",
+          question: "Which one of these is MOST me?",
+          answers: [
+            "Feeding you even if you say 'I’m not hungry'",
+            "Kissing you mid-task just to bother you",
+            "Holding you while you sleep and giving you lots of kisses",
+            "All of the above, you belong to me",
+          ],
+          correctIndex: 3,
+          feedback:
+            "Literally all of the above. You’re not getting rid of me. Ever.",
+        },
+        {
+          type: "mc",
+          question:
+            "Which version of you drives me insane the most (in a good way)?",
+          answers: [
+            "You in full goth energy, looking untouchable",
+            "You focused, sewing, in your zone",
+            "You half-asleep and clingy",
+            "All of them. I'm obsessed with all of them.",
+          ],
+          correctIndex: 3,
+          feedback:
+            "It’s all of you. The pretty, the dangerous, the soft. I want every version.",
+        },
+        {
+          type: "mc",
+          question:
+            "If I could describe you in one dramatic line, which one is the most accurate?",
+          answers: [
+            "‘She’s so pretty I forget how to breathe.’",
+            "‘She’s a problem and I love it.’",
+            "‘I’d worship her if she let me.’",
+            "All of those are things I’ve actually thought.",
+          ],
+          correctIndex: 3,
+          feedback:
+            "Yes I have actually thought all of these. You can’t stop me.",
+        },
+        {
+          type: "mc",
+          question: "Which future moment am I starving for?",
+          answers: [
+            "Going on dates. Lots of dates and just enjoying each others' company",
+            "You asleep on me, finally in my arms instead of on a screen",
+            "Us doing nothing together, just existing in the same room in quiet",
+            "All of those and I replay them in my head",
+          ],
+          correctIndex: 3,
+          feedback:
+            "I think about all of these things. I want to experience it all with you soon.",
+        },
+        {
+          type: "mc",
+          question: "Finish the quote: 'Is mayonnaise...'",
+          answers: [
+            "‘...a sauce?’",
+            "‘...an instrument?’",
+            "‘...a personality trait?’",
+            "‘...valid?’",
+          ],
+          correctIndex: 1,
+          feedback: "‘Is mayonnaise an instrument?’ – Patrick, in Band Geeks.",
+        },
+        {
+          type: "mc",
+          question:
+            "In the 'Chocolate with Nuts' episode, what are SpongeBob and Patrick trying to sell door-to-door?",
+          answers: ["Perfume", "Life insurance", "Chocolate bars", "Fancy art"],
+          correctIndex: 2,
+          feedback:
+            "‘CHOCOLATEEEE!!!’ Absolute classic screaming salesman energy.",
+        },
+        {
+          type: "mc",
+          question:
+            "Who said this line: 'The inner machinations of my mind are an enigma'?",
+          answers: ["Squidward", "Plankton", "Patrick", "Mr. Krabs"],
+          correctIndex: 2,
+          feedback: "That's Dr. Professor Patrick to you ;p",
+        },
+        {
+          type: "mc",
+          question:
+            "In 'Band Geeks', what song do they perform at the Bubble Bowl?",
+          answers: [
+            "Sweet Victory",
+            "Don't Stop Believin'",
+            "Living on a Prayer",
+            "We Are the Champions",
+          ],
+          correctIndex: 0,
+          feedback: "Sweet. Victory. Squilliam got cooked.",
+        },
+        {
+          type: "mc",
+          question: "Finish the quote: 'I’m ugly and I’m...'?",
+          answers: [
+            "‘...thriving’",
+            "‘...beautiful’",
+            "‘...loved anyway’",
+            "‘...proud’",
+          ],
+          correctIndex: 3,
+          feedback: "‘I’m ugly and I’m proud!’",
+        },
+        {
+          type: "mc",
+          question:
+            "What does SpongeBob need to deliver in the 'Pizza Delivery' episode?",
+          answers: [
+            "A Krabby Patty",
+            "Kelp Shake",
+            "Krusty Krab Pizza",
+            "Seaweed Salad",
+          ],
+          correctIndex: 2,
+          feedback:
+            "The Krusty Krab Pizza. For you and me. He really risked his life for that delivery.",
+        },
+        {
+          type: "mc",
+          question:
+            "Which character screams 'CHOCOLATE!' like a horror movie jumpscare guy?",
+          answers: [
+            "That super old fish lady",
+            "Random ripped fish with veins popping",
+            "Bubble Buddy",
+            "Flats the Flounder",
+          ],
+          correctIndex: 1,
+          feedback:
+            "Veiny, deranged chocolate guy. He wanted that chocolate like his life depended on it.",
+        },
+        {
+          type: "mc",
+          question: "Which one of these is an ACTUAL SpongeBob moment?",
+          answers: [
+            "Patrick forgetting how to open a door so he just lives outside",
+            "SpongeBob going feral because his ‘perfect’ hat got a fingerprint",
+            "Squidward eating so many Krabby Patties he explodes",
+            "Mr. Krabs joining a knitting club to relax",
+          ],
+          correctIndex: 2,
+          feedback: "It'll go straight to your thighs...then you'll blow up!",
+        },
+        {
+          type: "mc",
+          question: "Be honest. What am I to you?",
+          answers: [
+            "Your little problem",
+            "Your comfort person",
+            "Your future",
+            "All of the above",
+          ],
+          correctIndex: 3,
+          feedback: "I want to be your everything. I mean that.",
+        },
+        {
+          type: "mc",
+          question: "Okay final one. Which statement is 100% true?",
+          answers: [
+            "I’m proud of you and appreciate everything you do, even when you don't think so highly of yourself",
+            "I want to hold you when you’re tired and take care of you",
+            "I love you and I'm not going anywhere",
+            "All of the above, obviously",
+          ],
+          correctIndex: 3,
+          feedback: "All of it is true. Every single day. You’re mine.",
+        },
+      ];
+
+      /* finalReveal now holds your real letter */
+      const finalReveal = {
+        title: "Happy Birthday, my love.",
+        note: "You are art. You are craft. You are danger and comfort at the same time. I love every version of you.",
+        secretMessage:
+          "My love,\n\nEvery day with you, even across the distance, feels like another thread in something we’re quietly weaving together. Soon we’ll finally stand in front of each other for the first time — no more screens, no more wishing you were here — just us. I keep thinking about all the places waiting for us: walking the snowy streets of Edinburgh, the air cold and old and romantic, or sinking our feet into warm sand in Bora Bora, watching the water glow while you lean into me.\n\nThere are so many things I want to experience with you. The little things — laughing in person, feeding you, holding you while you fall asleep on me — and the big ones, like getting lost in cities we’ve never seen and making memories that belong only to us. I want late night drives, hotel balconies, quiet mornings, everything.\n\nEven with the miles between us, my heart always finds you. I love you more than yesterday, and I’ll love you even more tomorrow. That will never stop.\n",
+      };
+
+      /* STATE */
+      let currentIndex = 0;
+      let score = 0;
+      let answered = false;
+      let candleLit = false;
+
+      /* DOM refs */
+      const introScreen = document.getElementById("introScreen");
+      const questionScreen = document.getElementById("questionScreen");
+      const finalScreen = document.getElementById("finalScreen");
+
+      const startBtn = document.getElementById("startBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const replayBtn = document.getElementById("replayBtn");
+
+      const questionText = document.getElementById("questionText");
+      const answersWrap = document.getElementById("answersWrap");
+      const feedbackBox = document.getElementById("feedbackBox");
+
+      const progressText = document.getElementById("progressText");
+      const scoreText = document.getElementById("scoreText");
+      const progressBar = document.getElementById("progressBar");
+
+      const finalTitle = document.getElementById("finalTitle");
+      const finalNote = document.getElementById("finalNote");
+      const secretMessage = document.getElementById("secretMessage");
+
+      const cakeWrapper = document.getElementById("cakeWrapper");
+      const cakeHint = document.getElementById("cakeHint");
+      const flame = document.getElementById("flame");
+      const cakeGlow = document.getElementById("cakeGlow");
+
+      const cardPanel = document.getElementById("cardPanel");
+
+      /* EVENTS */
+      cakeWrapper.addEventListener("click", lightCandle);
+      startBtn.addEventListener("click", startGame);
+      nextBtn.addEventListener("click", handleNext);
+      replayBtn.addEventListener("click", resetGame);
+
+      /* candle lighting */
+      function lightCandle() {
+        if (candleLit) return;
+        candleLit = true;
+
+        flame.style.opacity = "1";
+        cakeGlow.style.opacity = "1";
+
+        cakeHint.textContent = "make a wish.";
+        cakeHint.classList.add("lit");
+
+        startBtn.style.display = "block";
+        startBtn.classList.add("wiggle");
+
+        startBtn.animate(
+          [
+            {
+              transform: "scale(0.95)",
+              boxShadow: "0 5px 20px rgba(177,6,75,0.3)",
+            },
+            {
+              transform: "scale(1.07)",
+              boxShadow: "0 20px 50px rgba(177,6,75,0.6)",
+            },
+            {
+              transform: "scale(1)",
+              boxShadow: "0 15px 40px rgba(177,6,75,0.45)",
+            },
+          ],
+          { duration: 450, easing: "ease-out" }
+        );
+      }
+
+      /* GAME FLOW */
+      function startGame() {
+        // hide intro, show quiz
+        introScreen.classList.remove("active");
+        finalScreen.classList.remove("active");
+        questionScreen.classList.add("active");
+
+        currentIndex = 0;
+        score = 0;
+        answered = false;
+
+        renderQuestion();
+        updateProgressUI();
+
+        // scroll card to top
+        cardPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => questionText.focus?.(), 400);
+      }
+
+      function renderQuestion() {
+        const q = questions[currentIndex];
+
+        questionText.textContent = q.question;
+        answersWrap.innerHTML = "";
+        feedbackBox.textContent = "";
+        feedbackBox.classList.remove("active");
+        nextBtn.classList.remove("active");
+
+        answered = false;
+
+        if (q.type === "mc") {
+          renderMultipleChoice(q);
+        } else if (q.type === "text") {
+          renderTextInput(q);
+        }
+
+        updateProgressUI();
+      }
+
+      function renderMultipleChoice(q) {
+        q.answers.forEach((ans, i) => {
+          const btn = document.createElement("button");
+          btn.className = "answer-btn";
+          btn.innerHTML = `<span class="letter">${String.fromCharCode(
+            65 + i
+          )}</span>${ans}`;
+          btn.addEventListener("click", () => handleMCAnswer(i));
+          answersWrap.appendChild(btn);
+        });
+      }
+
+      function handleMCAnswer(choiceIndex) {
+        if (answered) return;
+        answered = true;
+
+        const q = questions[currentIndex];
+        const correct = q.correctIndex;
+
+        const buttons = Array.from(document.querySelectorAll(".answer-btn"));
+
+        buttons.forEach((btn, i) => {
+          if (i === correct) {
+            btn.classList.add("correct");
+          } else if (i === choiceIndex) {
+            btn.classList.add("wrong");
+          }
+          btn.disabled = true;
+        });
+
+        if (choiceIndex === correct) {
+          score += 1;
+        }
+
+        scoreText.textContent = `Score: ${score}`;
+
+        feedbackBox.textContent = q.feedback;
+        feedbackBox.classList.add("active");
+        nextBtn.classList.add("active");
+      }
+
+      function renderTextInput(q) {
+        const wrapper = document.createElement("div");
+        wrapper.style.width = "100%";
+        wrapper.style.display = "flex";
+        wrapper.style.flexDirection = "column";
+        wrapper.style.gap = ".6rem";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "your answer here";
+        Object.assign(input.style, {
+          background: "rgba(255,255,255,.06)",
+          border: "1px solid rgba(255,255,255,.18)",
+          borderRadius: ".8rem",
+          padding: "1rem",
+          color: "var(--text-main)",
+          fontSize: "1rem",
+          outline: "none",
+          width: "100%",
+        });
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "Lock in answer";
+        submitBtn.className = "start-btn";
+        submitBtn.style.maxWidth = "200px";
+        submitBtn.style.fontSize = ".92rem";
+
+        const liveMsg = document.createElement("div");
+        liveMsg.style.fontSize = ".85rem";
+        liveMsg.style.color = "var(--text-dim)";
+        liveMsg.style.minHeight = "2.4rem";
+        liveMsg.style.lineHeight = "1.4";
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(submitBtn);
+        wrapper.appendChild(liveMsg);
+
+        answersWrap.appendChild(wrapper);
+
+        submitBtn.addEventListener("click", () => {
+          if (answered) return;
+
+          const result = q.validate(input.value);
+
+          if (result.correct) {
+            answered = true;
+            score += 1;
+            scoreText.textContent = `Score: ${score}`;
+
+            input.disabled = true;
+            submitBtn.disabled = true;
+
+            feedbackBox.textContent =
+              (result.message || "") + "\n\n" + (q.feedbackOnCorrect || "");
+            feedbackBox.classList.add("active");
+
+            nextBtn.classList.add("active");
+          } else {
+            liveMsg.innerText =
+              result.message + (result.hint ? "\n" + result.hint : "");
+          }
+        });
+      }
+
+      function handleNext() {
+        currentIndex += 1;
+        if (currentIndex >= questions.length) {
+          showFinal();
+        } else {
+          renderQuestion();
+        }
+      }
+
+      function showFinal() {
+        questionScreen.classList.remove("active");
+        finalScreen.classList.add("active");
+
+        finalTitle.textContent = finalReveal.title;
+        finalNote.textContent = finalReveal.note;
+        secretMessage.textContent = finalReveal.secretMessage;
+
+        cardPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function resetGame() {
+        introScreen.classList.remove("active");
+        finalScreen.classList.remove("active");
+        questionScreen.classList.add("active");
+
+        currentIndex = 0;
+        score = 0;
+        answered = false;
+
+        renderQuestion();
+        updateProgressUI();
+
+        cardPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function updateProgressUI() {
+        const total = questions.length;
+        progressText.textContent = `Question ${currentIndex + 1} / ${total}`;
+        scoreText.textContent = `Score: ${score}`;
+
+        const pct = (currentIndex / total) * 100;
+        progressBar.style.width = pct + "%";
+      }
+    </script>
+  </body>
+</html>
